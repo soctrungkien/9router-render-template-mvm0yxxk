@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+#
+# 9Router on Render — one-click gallery template
+# Upstream: https://github.com/decolua/9router
+# Image: https://hub.docker.com/r/decolua/9router (tag: 0.5.45)
+#
+# Pattern: image-wrapper (public multi-arch image + SQLite disk).
+# Headroom / SearXNG sidecars are optional and configured after deploy.
+
+previews:
+  generation: off
+
+projects:
+  - name: 9router-render-template
+    environments:
+      - name: production
+        services:
+          - type: web
+            name: 9router
+            runtime: image
+            plan: standard
+            region: oregon
+            image:
+              url: docker.io/decolua/9router:0.5.45
+            healthCheckPath: /api/health
+            autoDeployTrigger: off
+            disk:
+              name: 9router-data
+              mountPath: /app/data
+              sizeGB: 5
+            envVars:
+              - key: PORT
+                value: "20128"
+              - key: HOSTNAME
+                value: "0.0.0.0"
+              - key: NODE_ENV
+                value: production
+              - key: DATA_DIR
+                value: "/app/data"
+              - key: JWT_SECRET
+                generateValue: true
+              - key: API_KEY_SECRET
+                generateValue: true
+              - key: MACHINE_ID_SALT
+                generateValue: true
+              - key: INITIAL_PASSWORD
+                sync: false
+              - key: REQUIRE_API_KEY
+                value: "true"
+              - key: AUTH_COOKIE_SECURE
+                value: "true"
+              - key: CLOUD_URL
+                value: "https://9router.com"
+              - key: NEXT_PUBLIC_CLOUD_URL
+                value: "https://9router.com"
+              - key: ENABLE_REQUEST_LOGS
+                value: "false"
+              - key: BASE_URL
+                fromService:
+                  name: 9router
+                  type: web
+                  envVarKey: RENDER_EXTERNAL_URL
+              - key: NEXT_PUBLIC_BASE_URL
+                fromService:
+                  name: 9router
+                  type: web
+                  envVarKey: RENDER_EXTERNAL_URL
